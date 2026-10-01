@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>*{box-sizing:border-box}body{margin:0}</style>
+<title>治療院の発信ラボ 無料ツール</title>
+<meta name="description" content="整体院・治療院の院長さん向けの無料ツール集。広告NG表現のチェックや、Google口コミへの返信文づくりなど、院の「書く仕事」をラクにします。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap">
+<style>
+/* Layout: short masthead, then a two-column list of tools; one column on phones */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --line:#d6e2dc; --fg:#1f3a30; --muted:#5d746a;
+  --accent:#3f8a6c; --accent-ink:#ffffff; --soft:#e7f1ec;
+  --font-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --font-body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121a17; --surface:#19241f; --line:#2c3b34; --fg:#e3eee8; --muted:#97ada3;
+  --accent:#6cc39d; --accent-ink:#0e1a15; --soft:#20322a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121a17; --surface:#19241f; --line:#2c3b34; --fg:#e3eee8; --muted:#97ada3;
+  --accent:#6cc39d; --accent-ink:#0e1a15; --soft:#20322a; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.75}
+.wrap{max-width:960px;margin:0 auto;padding-inline:20px;padding-block:40px 56px;display:grid;gap:32px}
+header{display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:700}
+h1{font-family:var(--font-display);font-size:clamp(26px,4.5vw,36px);line-height:1.35;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--muted);max-width:60ch}
+.tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;list-style:none;margin:0;padding:0}
+@media (max-width:640px){.tools{grid-template-columns:1fr}}
+.tool{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:grid}
+.tool a{display:grid;gap:8px;padding:20px;color:inherit;text-decoration:none;border-radius:10px;height:100%;box-sizing:border-box;align-content:start}
+.tool a:hover{background:var(--soft)}
+.tool a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tool .use{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em}
+.tool h2{font-size:18px;margin:0;line-height:1.5}
+.tool p{margin:0;color:var(--muted);font-size:14px}
+.tool .go{font-weight:700;color:var(--accent);font-size:14px}
+.about{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:24px}
+.about h2{font-family:var(--font-display);font-size:19px;margin:0}
+.about p{margin:0;max-width:62ch}
+.links{display:flex;gap:10px;flex-wrap:wrap}
+.links a{display:inline-block;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:8px 18px;border:1px solid var(--accent);color:var(--accent)}
+.links a.primary{background:var(--accent);color:var(--accent-ink)}
+.links a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer{font-size:12px;color:var(--muted)}
+footer p{margin:0}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">治療院の発信ラボ</span>
+    <h1>整体院・治療院の「書く仕事」をラクにする無料ツール</h1>
+    <p class="lead">インスタやチラシの文章チェック、口コミへの返信づくりなど、院長さんが毎週くり返す作業を短くするためのツールです。登録は不要で、入力した文章はどこにも送信されません。</p>
+  </header>
+
+  <ul class="tools">
+    <li class="tool"><a href="./ng-checker/">
+      <span class="use">文章チェック</span>
+      <h2>広告NG表現チェッカー</h2>
+      <p>投稿やチラシの文章を貼ると、「治る」「必ず」「No.1」など広告で避けたい言葉に色が付き、言い換えの例が出ます。</p>
+      <span class="go">使ってみる →</span>
+    </a></li>
+    <li class="tool"><a href="./review/">
+      <span class="use">口コミ対応</span>
+      <h2>口コミ返信メーカー</h2>
+      <p>Googleの口コミの星の数と内容を選ぶと、返信文の候補が3つできます。低い評価への返信にも対応しています。</p>
+      <span class="go">使ってみる →</span>
+    </a></li>
+  </ul>
+
+  <section class="about">
+    <h2>ChatGPTで発信を続けたい方へ</h2>
+    <p>院の情報と広告のルールを先にChatGPTに覚えさせておくと、インスタ、LINE、口コミ返信、ブログ、チラシの文章を、ルールを守った形で一気に作れます。そのためのプロンプトを27本まとめています。</p>
+    <div class="links">
+      <a class="primary" href="https://note.com/chiryoin_ai_lab/n/n81f506b6ed4e" target="_blank" rel="noopener">プロンプト集を見る</a>
+      <a href="https://note.com/chiryoin_ai_lab" target="_blank" rel="noopener">noteの記事一覧</a>
+    </div>
+  </section>
+
+  <footer><p>© 治療院の発信ラボ</p></footer>
+</div>
+
+</body>
+</html>
