@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chiryoin-ai-lab.github.io/sitemap.xml

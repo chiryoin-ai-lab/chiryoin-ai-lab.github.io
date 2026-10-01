@@ -29,8 +29,8 @@ header{display:grid;gap:8px}
 .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:700}
 h1{font-family:var(--font-display);font-size:clamp(26px,4.5vw,36px);line-height:1.35;margin:0;text-wrap:balance}
 .lead{margin:0;color:var(--muted);max-width:60ch}
-.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;list-style:none;margin:0;padding:0}
-@media (max-width:860px){.tools{grid-template-columns:1fr}}
+.tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;list-style:none;margin:0;padding:0}
+@media (max-width:640px){.tools{grid-template-columns:1fr}}
 .tool{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:grid}
 .tool a{display:grid;gap:8px;padding:20px;color:inherit;text-decoration:none;border-radius:10px;height:100%;box-sizing:border-box;align-content:start}
 .tool a:hover{background:var(--soft)}
@@ -70,6 +70,12 @@ footer p{margin:0}
       <span class="use">口コミ対応</span>
       <h2>口コミ返信メーカー</h2>
       <p>Googleの口コミの星の数と内容を選ぶと、返信文の候補が3つできます。低い評価への返信にも対応しています。</p>
+      <span class="go">使ってみる →</span>
+    </a></li>
+    <li class="tool"><a href="./calendar/">
+      <span class="use">投稿ネタ</span>
+      <h2>投稿カレンダーメーカー</h2>
+      <p>月と投稿する曜日を選ぶと、季節のネタを混ぜた1か月分のインスタ投稿の予定表ができます。</p>
       <span class="go">使ってみる →</span>
     </a></li>
     <li class="tool"><a href="./line/">

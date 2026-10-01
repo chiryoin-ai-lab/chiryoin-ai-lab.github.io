@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>*{box-sizing:border-box}body{margin:0}</style>
+<title>整体院の投稿カレンダーメーカー</title>
+<meta name="description" content="月と投稿する曜日を選ぶだけで、季節のネタを混ぜた整体院・治療院のインスタ投稿の予定表が1か月分できる無料ツールです。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&display=swap">
+<style>
+/* Layout: settings on the left, the month as a dated table on the right; stacked on phones */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --line:#d6e2dc; --fg:#1f3a30; --muted:#5d746a;
+  --accent:#3f8a6c; --accent-ink:#ffffff; --star:#d99a1e; --soft:#e7f1ec; --season:#9a5b00; --season-bg:#fbecd2;
+  --font-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --font-body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121a17; --surface:#19241f; --line:#2c3b34; --fg:#e3eee8; --muted:#97ada3;
+  --accent:#6cc39d; --accent-ink:#0e1a15; --star:#f2c552; --soft:#20322a; --season:#f2c552; --season-bg:#3d3112; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121a17; --surface:#19241f; --line:#2c3b34; --fg:#e3eee8; --muted:#97ada3;
+  --accent:#6cc39d; --accent-ink:#0e1a15; --star:#f2c552; --soft:#20322a; --season:#f2c552; --season-bg:#3d3112; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.75}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:28px 48px;display:grid;gap:24px}
+header{display:grid;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:700;text-decoration:none}
+h1{font-family:var(--font-display);font-size:clamp(24px,4vw,32px);line-height:1.35;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--muted);max-width:62ch}
+.desk{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:20px;align-items:start}
+@media (max-width:820px){.desk{grid-template-columns:1fr}}
+form{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:18px;min-width:0}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:8px;min-width:0}
+legend,.lbl{font-size:13px;font-weight:700;padding:0;margin-bottom:8px}
+.lbl{margin:0}
+.opt{color:var(--muted);font-weight:400;font-size:12px}
+.stars{display:flex;gap:6px;flex-wrap:wrap}
+.stars input,.chips input{position:absolute;opacity:0;pointer-events:none}
+.stars label,.chips label{cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;background:var(--surface);user-select:none}
+.stars label .s{color:var(--star);letter-spacing:1px}
+.stars input:checked+label,.chips input:checked+label{border-color:var(--accent);background:var(--soft);font-weight:700}
+.stars input:focus-visible+label,.chips input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.field{display:grid;gap:6px}
+input[type=text],textarea,select{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;box-sizing:border-box}
+textarea{min-height:64px;resize:vertical}
+input[type=text]:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:0}
+.results{display:grid;gap:12px;min-width:0}
+.results-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.results-head h2{font-size:16px;margin:0}
+.results-head span{font-size:12px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:grid;min-width:0}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.card-head b{font-size:13px}
+.card-head .len{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.reply{margin:0;padding:14px 16px;white-space:pre-wrap;word-break:break-word;line-height:1.85}
+button{font:inherit;font-size:13px;border-radius:999px;padding:4px 14px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:700}
+button.done{background:var(--surface);color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tips{background:var(--soft);border-radius:10px;padding:14px 18px;display:grid;gap:6px}
+.tips h2{font-size:14px;margin:0}
+.tips ul{margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:14px}
+.cta{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:12px}
+.cta h2{font-family:var(--font-display);font-size:19px;margin:0}
+.cta p{margin:0}
+.links{display:flex;gap:10px;flex-wrap:wrap}
+.links a{display:inline-block;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:8px 18px;border:1px solid var(--accent);color:var(--accent)}
+.links a.primary{background:var(--accent);color:var(--accent-ink)}
+.links a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer{font-size:12px;color:var(--muted);display:grid;gap:4px}
+footer p{margin:0}
+
+button.ghost{background:var(--surface);color:var(--accent);justify-self:start}
+.tbl-wrap{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.date{white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums}
+td.date span{font-weight:400;color:var(--muted);font-size:12px}
+td.empty{color:var(--muted)}
+.tag{display:inline-block;font-size:12px;border-radius:999px;padding:1px 10px;white-space:nowrap;background:var(--soft);color:var(--accent);font-weight:700}
+.tag.t-season{background:var(--season-bg);color:var(--season)}
+.tag.t-intro{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.sum{margin:0;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="eyebrow" href="../">無料ツール｜治療院の発信ラボ</a>
+    <h1>整体院・治療院の投稿カレンダーメーカー</h1>
+    <p class="lead">月と投稿する曜日を選ぶと、季節のネタを混ぜた1か月分のインスタ投稿の予定表ができます。体のお役立ち情報8割、院の紹介2割のバランスで組んでいます。入力した内容はどこにも送信されません。</p>
+  </header>
+
+  <section class="desk">
+    <form id="f" autocomplete="off">
+      <div class="field">
+        <label class="lbl" for="ym">投稿する月</label>
+        <select id="ym"></select>
+      </div>
+      <fieldset>
+        <legend>投稿する曜日 <span class="opt">週2〜3回がおすすめ</span></legend>
+        <div class="chips" id="days"></div>
+      </fieldset>
+      <fieldset>
+        <legend>院の紹介の投稿</legend>
+        <div class="chips" id="intro"></div>
+      </fieldset>
+      <button type="button" id="shuffle" class="ghost">ネタの組み合わせを変える</button>
+    </form>
+
+    <div class="results" aria-live="polite">
+      <div class="results-head"><h2 id="title">投稿の予定表</h2><button type="button" id="copy">一覧をコピー</button></div>
+      <div class="tbl-wrap"><table id="tbl"><thead><tr><th scope="col">日付</th><th scope="col">テーマ</th><th scope="col">種類</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <p class="sum" id="sum"></p>
+    </div>
+  </section>
+
+  <section class="tips">
+    <h2>予定表の使い方</h2>
+    <ul>
+      <li>テーマを決めておくと、当日は「書くだけ」になるので投稿が続きやすくなります</li>
+      <li>季節のネタは、その時期に投稿すると反応が上がりやすいテーマです</li>
+      <li>投稿の文章を書くときは、「治る」「必ず」などの言葉が入っていないか、最後に確認してください</li>
+    </ul>
+  </section>
+
+  <section class="cta">
+    <h2>テーマが決まったら、文章はAIに任せる</h2>
+    <p>ChatGPTに院の情報と広告のルールを先に覚えさせておくと、この予定表のテーマを送るだけで、ルールを守った投稿文ができあがります。インスタ用を含めて、プロンプトを27本まとめました。</p>
+    <div class="links">
+      <a class="primary" href="https://note.com/chiryoin_ai_lab/n/n81f506b6ed4e" target="_blank" rel="noopener">プロンプト集を見る</a>
+      <a href="../ng-checker/">広告NG表現チェッカー（無料）</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>テーマは一般的な例です。院の得意なことや来てほしい方に合わせて入れ替えてください。</p>
+    <p>© 治療院の発信ラボ</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var POOL = {
+    neck:["デスクワークの肩こりに、座ったままできるストレッチ","スマホ首（ストレートネック）のセルフチェック","朝起きると首がつらいときに見直したい枕の高さ","肩甲骨まわりをほぐす簡単な動き","片側の肩だけこる人に多い生活のクセ","目の疲れと首・肩の関係","巻き肩のセルフチェック","肩が上がりにくいと感じたときの過ごし方"],
+    back:["長時間座ると腰がつらい人の座り方","朝の腰のこわばりとその日の過ごし方","重い物を持つときの体の使い方","猫背が気になる人の立ち姿勢チェック","反り腰のセルフチェック","足を組むクセと体のバランス","車の運転で腰が疲れる人のシートの合わせ方","腰がつらい人がやりがちな習慣3つ"],
+    life:["寝ても疲れが取れない人の寝る姿勢","マットレスの固さの選び方","お風呂の入り方で変わる体のこわばり","在宅ワークのデスクとイスの高さ","水分補給と体の張り","無理なく続けられる運動のはじめ方","スマホを見る姿勢の見直し方","立ち仕事の脚の疲れをためないコツ"],
+    stretch:["朝1分でできるストレッチ","寝る前1分でできるストレッチ","タオル1本でできるストレッチ","壁を使ったストレッチ","テレビを見ながらできるケア","股関節をゆるめるストレッチ","ふくらはぎのセルフケア","ストレッチでやりがちな間違い"],
+    faq:["整体って痛いの？","初めての整体で聞かれること","どんな服装で行けばいい？","整体とマッサージの違い","どのくらいの間隔で通うもの？","施術のあとに気をつけること","施術のあと眠くなるのはなぜ？","こんなときは先に病院へ"],
+    intro:["院長の自己紹介（顔出しなしでOK）","院内の雰囲気紹介","初めての方の来院の流れ","予約のしかた","駐車場・アクセスの案内","院で大事にしていること","こんな方に来てほしい"]
+  };
+  var SEASON = {
+    1:["寒さで体がこわばるときのケア","年末年始の食べすぎ・寝すぎの体","雪かきで体を痛めないコツ"],
+    2:["冷えやすい足元の温め方","寒い朝の体の動かし方","雪かきで体を痛めないコツ"],
+    3:["寒暖差でだるいときの過ごし方","新生活の前に整えたい姿勢","花粉の季節の目の疲れと肩"],
+    4:["新生活の疲れが出たときのケア","慣れない通勤の肩の力の抜き方","入学・入社シーズンの姿勢"],
+    5:["連休明けのだるさとの付き合い方","生活リズムを整える朝の習慣","外遊びのあとの体のケア"],
+    6:["梅雨どきの体の重だるさ","雨の日に家でできる軽い運動","湿気の多い日のお風呂の入り方"],
+    7:["冷房で体が冷えるときのケア","夏の寝苦しさと寝る姿勢","暑い日の水分補給と体の張り"],
+    8:["夏の疲れをためないコツ","冷房と外の温度差でだるいとき","夏休みの子どもの姿勢"],
+    9:["夏休み明けの体のリズム","季節の変わり目のだるさ","秋の運動を始める前の準備"],
+    10:["運動の秋、体を動かす前後のストレッチ","朝晩の冷え込みと首・肩","運動会や行事のあとの体のケア"],
+    11:["冷えと体のこわばり","寒くなる前に見直したい寝具","年末に向けて疲れをためないコツ"],
+    12:["大掃除で腰を痛めないコツ","年末の忙しさと肩の力の抜き方","冬の入浴で体を温めるコツ"]
+  };
+  var TAG = {neck:"首・肩",back:"腰・姿勢",life:"生活習慣",stretch:"セルフケア",faq:"整体の疑問",intro:"院の紹介",season:"季節"};
+  var DAYS = [["1","月"],["2","火"],["3","水"],["4","木"],["5","金"],["6","土"],["0","日"]];
+  var INTRO = [["2","月2回"],["1","月1回"],["0","入れない"]];
+  var state = {days:{"1":true,"4":true}, intro:"2", seed:1};
+  var $ = function(id){ return document.getElementById(id); };
+  var WD = "日月火水木金土";
+
+  function rng(seed){ var s = seed % 2147483647; if(s <= 0) s += 2147483646; return function(){ s = s * 16807 % 2147483647; return (s-1)/2147483646; }; }
+  function shuffle(a, r){ a = a.slice(); for(var i=a.length-1;i>0;i--){ var j = Math.floor(r()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+  function buildChips(){
+    $("days").innerHTML = DAYS.map(function(d){
+      var id = "d"+d[0];
+      return '<input type="checkbox" id="'+id+'" value="'+d[0]+'"'+(state.days[d[0]]?" checked":"")+'><label for="'+id+'">'+d[1]+'</label>';
+    }).join("");
+    $("intro").innerHTML = INTRO.map(function(d){
+      var id = "i"+d[0];
+      return '<input type="radio" name="intro" id="'+id+'" value="'+d[0]+'"'+(state.intro===d[0]?" checked":"")+'><label for="'+id+'">'+d[1]+'</label>';
+    }).join("");
+  }
+
+  function plan(){
+    var parts = $("ym").value.split("-"), y = +parts[0], m = +parts[1];
+    var last = new Date(y, m, 0).getDate(), dates = [];
+    for(var d=1; d<=last; d++){ var wd = new Date(y, m-1, d).getDay(); if(state.days[String(wd)]) dates.push({d:d, wd:wd}); }
+    var n = dates.length, r = rng(y*100 + m + state.seed*7919);
+    var nIntro = Math.min(+state.intro, n), nSeason = Math.min(n >= 6 ? 2 : 1, n - nIntro, SEASON[m].length);
+    var items = [];
+    shuffle(SEASON[m], r).slice(0, nSeason).forEach(function(t){ items.push({t:t, k:"season"}); });
+    shuffle(POOL.intro, r).slice(0, nIntro).forEach(function(t){ items.push({t:t, k:"intro"}); });
+    var cats = ["neck","back","stretch","life","faq"], bags = {}, ci = Math.floor(r()*cats.length);
+    cats.forEach(function(c){ bags[c] = shuffle(POOL[c], r); });
+    while(items.length < n){ var c = cats[ci % cats.length]; ci++; var t = bags[c].shift(); if(t) items.push({t:t, k:c}); }
+    // spread: seasonal early, intro in the middle and end, rest in order
+    var season = items.filter(function(i){return i.k==="season";}), intro = items.filter(function(i){return i.k==="intro";}), rest = items.filter(function(i){return i.k!=="season" && i.k!=="intro";});
+    var out = new Array(n), pos = [];
+    season.forEach(function(it, i){ var p = Math.min(n-1, i === 0 ? 1 : Math.floor(n*0.55)); while(out[p]) p = (p+1)%n; out[p] = it; });
+    intro.forEach(function(it, i){ var p = Math.min(n-1, Math.floor(n*(i===0 ? 0.35 : 0.85))); while(out[p]) p = (p+1)%n; out[p] = it; });
+    for(var i=0;i<n;i++){ if(!out[i]) out[i] = rest.shift(); }
+    return {y:y, m:m, rows: dates.map(function(dt, i){ return {d:dt.d, wd:dt.wd, t:out[i].t, k:out[i].k}; })};
+  }
+
+  function esc(s){return s.replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+
+  var current;
+  function render(){
+    current = plan();
+    $("title").textContent = current.y + "年" + current.m + "月の投稿予定表";
+    if(!current.rows.length){
+      $("rows").innerHTML = '<tr><td colspan="3" class="empty">投稿する曜日を1つ以上選んでください。</td></tr>';
+      $("sum").textContent = ""; return;
+    }
+    $("rows").innerHTML = current.rows.map(function(r){
+      return '<tr><td class="date">'+current.m+'/'+r.d+'<span>（'+WD[r.wd]+'）</span></td><td>'+esc(r.t)+'</td><td><span class="tag t-'+r.k+'">'+TAG[r.k]+'</span></td></tr>';
+    }).join("");
+    var nI = current.rows.filter(function(r){return r.k==="intro";}).length;
+    $("sum").textContent = "全" + current.rows.length + "本（お役立ち " + (current.rows.length - nI) + "本・院の紹介 " + nI + "本）";
+  }
+
+  var sel = $("ym"), now = new Date();
+  for(var i=0;i<12;i++){
+    var dt = new Date(now.getFullYear(), now.getMonth()+i, 1), o = document.createElement("option");
+    o.value = dt.getFullYear() + "-" + (dt.getMonth()+1); o.textContent = dt.getFullYear() + "年" + (dt.getMonth()+1) + "月";
+    sel.appendChild(o);
+  }
+
+  buildChips();
+  $("days").addEventListener("change", function(e){ state.days[e.target.value] = e.target.checked; render(); });
+  $("intro").addEventListener("change", function(e){ state.intro = e.target.value; render(); });
+  sel.addEventListener("change", function(){ state.seed = 1; render(); });
+  $("shuffle").addEventListener("click", function(){ state.seed++; render(); });
+  $("f").addEventListener("submit", function(e){ e.preventDefault(); });
+
+  $("copy").addEventListener("click", function(){
+    var b = this;
+    var text = current.y+"年"+current.m+"月の投稿予定\n" + current.rows.map(function(r){ return current.m+"/"+r.d+"（"+WD[r.wd]+"）　"+r.t+"【"+TAG[r.k]+"】"; }).join("\n");
+    function ok(){ b.textContent = "コピーしました"; b.classList.add("done"); setTimeout(function(){ b.textContent = "一覧をコピー"; b.classList.remove("done"); }, 1800); }
+    function fallback(){ var r = document.createRange(); r.selectNodeContents($("tbl")); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "選択しました。コピーしてください"; }
+    try{ navigator.clipboard.writeText(text).then(ok, fallback); }catch(err){ fallback(); }
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
