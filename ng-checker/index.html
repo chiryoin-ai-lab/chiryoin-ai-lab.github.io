@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>*{box-sizing:border-box}body{margin:0}</style>
+<title>整体院の広告NGチェッカー</title>
+<meta name="description" content="整体院・治療院のSNS投稿、チラシ、ブログの文章を貼るだけで、広告で避けたい表現に色を付けて言い換え例を表示する無料ツールです。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Maru+Gothic:wght@700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a working desk — slim masthead, then input and result side by side (stacked on phones), findings list under the result */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --line:#d6e2dc; --fg:#1f3a30; --muted:#5d746a;
+  --accent:#3f8a6c; --accent-ink:#ffffff;
+  --ng:#c2452f; --ng-bg:#fbe3dd; --warn:#9a6a00; --warn-bg:#fdf0c9;
+  --font-display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --font-body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121a17; --surface:#19241f; --line:#2c3b34; --fg:#e3eee8; --muted:#97ada3;
+  --accent:#6cc39d; --accent-ink:#0e1a15;
+  --ng:#ff8d77; --ng-bg:#4a2219; --warn:#f2c552; --warn-bg:#3d3112; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121a17; --surface:#19241f; --line:#2c3b34; --fg:#e3eee8; --muted:#97ada3;
+  --accent:#6cc39d; --accent-ink:#0e1a15;
+  --ng:#ff8d77; --ng-bg:#4a2219; --warn:#f2c552; --warn-bg:#3d3112; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.75}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:28px 48px;display:grid;gap:24px}
+header{display:grid;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:700}
+h1{font-family:var(--font-display);font-size:clamp(24px,4vw,32px);line-height:1.35;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--muted);max-width:62ch}
+.desk{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media (max-width:820px){.desk{grid-template-columns:1fr}}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:grid;min-width:0}
+.pane-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.pane-head h2{font-size:14px;margin:0;font-weight:700}
+.pane-head .sub{font-size:12px;color:var(--muted)}
+textarea{width:100%;box-sizing:border-box;min-height:300px;border:0;resize:vertical;padding:16px;font:inherit;line-height:1.85;background:transparent;color:var(--fg)}
+textarea:focus{outline:2px solid var(--accent);outline-offset:-2px;border-radius:0 0 10px 10px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;font-size:13px;border-radius:999px;padding:5px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+button:hover{border-color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.out{padding:16px;white-space:pre-wrap;word-break:break-word;min-height:300px;line-height:1.85}
+.out .empty{color:var(--muted)}
+mark{border-radius:3px;padding:0 2px;color:inherit}
+mark.ng{background:var(--ng-bg);box-shadow:inset 0 -2px 0 var(--ng)}
+mark.warn{background:var(--warn-bg);box-shadow:inset 0 -2px 0 var(--warn)}
+.score{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;font-variant-numeric:tabular-nums}
+.pill.ng{background:var(--ng-bg);color:var(--ng)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.ok{background:var(--bg);color:var(--accent);border:1px solid var(--line)}
+.findings{display:grid;gap:10px}
+.findings h2{font-size:16px;margin:0}
+.list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.item{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:8px;padding:12px 16px;display:grid;gap:4px;min-width:0}
+.item.ng{border-left-color:var(--ng)}
+.item .top{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.term{font-weight:700;font-size:16px}
+.cnt{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.tag{font-size:11px;font-weight:700;letter-spacing:.06em}
+.item.ng .tag{color:var(--ng)} .item.warn .tag{color:var(--warn)}
+.why{margin:0;color:var(--muted);font-size:14px}
+.alt{margin:0;font-size:14px}
+.alt b{color:var(--accent)}
+.clear{color:var(--accent);font-weight:700;margin:0}
+.note{font-size:13px;color:var(--muted);margin:0;max-width:70ch}
+.cta{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:12px}
+.cta h2{font-family:var(--font-display);font-size:19px;margin:0}
+.cta p{margin:0}
+.links{display:flex;gap:10px;flex-wrap:wrap}
+.links a{display:inline-block;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:8px 18px;border:1px solid var(--accent);color:var(--accent)}
+.links a.primary{background:var(--accent);color:var(--accent-ink)}
+.links a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer{font-size:12px;color:var(--muted);display:grid;gap:4px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">無料ツール｜治療院の発信ラボ</span>
+    <h1>整体院・治療院の広告NG表現チェッカー</h1>
+    <p class="lead">インスタの投稿、チラシ、ブログ、LINEの配信文を貼ると、広告で避けたい言葉に色が付き、言い換えの例が出ます。文章はこのページの中だけで処理され、どこにも送信されません。</p>
+  </header>
+
+  <section class="desk" aria-label="チェック">
+    <div class="pane">
+      <div class="pane-head">
+        <h2><label for="src">チェックする文章</label></h2>
+        <div class="tools">
+          <button type="button" id="btn-sample">例文を入れる</button>
+          <button type="button" id="btn-clear">クリア</button>
+        </div>
+      </div>
+      <textarea id="src" spellcheck="false" placeholder="ここに文章を貼り付けてください"></textarea>
+    </div>
+    <div class="pane" aria-live="polite">
+      <div class="pane-head">
+        <h2>チェック結果</h2>
+        <div class="score" id="score"></div>
+      </div>
+      <div class="out" id="out"></div>
+    </div>
+  </section>
+
+  <section class="findings" aria-label="見つかった表現">
+    <h2>見つかった表現と言い換え例</h2>
+    <ul class="list" id="list"></ul>
+    <p class="note"><mark class="ng">赤</mark>は使わない方がいい表現、<mark class="warn">黄色</mark>は使い方しだいで問題になる表現です。病名や「患者」などは文脈によって問題ないこともあるので、前後の文と合わせて判断してください。</p>
+  </section>
+
+  <section class="cta">
+    <h2>毎回チェックするのが大変なら</h2>
+    <p>ChatGPTに院の情報と広告のルールを先に覚えさせておくと、最初からNG表現を避けた文章が出てくるようになります。インスタ、LINE、口コミ返信、ブログ、チラシに使えるプロンプトを27本まとめました。</p>
+    <div class="links">
+      <a class="primary" href="https://note.com/chiryoin_ai_lab/n/n81f506b6ed4e" target="_blank" rel="noopener">プロンプト集を見る</a>
+      <a href="https://note.com/chiryoin_ai_lab/n/n55f8a224fbb6" target="_blank" rel="noopener">NG表現の解説記事（無料）</a>
+    </div>
+  </section>
+
+  <footer>
+    <p class="note">このツールは、整体院・治療院の広告で一般に注意が必要とされる表現をもとにした簡易チェックです。法律上の判断を保証するものではありません。鍼灸院・接骨院（整骨院）は広告できる内容が法律で限られているため、迷ったときは管轄の保健所や専門家に確認してください。</p>
+    <p>© 治療院の発信ラボ</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // level: ng = 避ける / warn = 文脈しだい
+  var RULES = [
+    {re:/治療院/g, level:"warn", term:"治療院", why:"整体・カイロプラクティックは「治療」をうたえないため、院名や広告で「治療院」と名乗ると医療と誤解されるおそれがあります。", alt:"整体院、〇〇整体、ボディケア"},
+    {re:/治療/g, level:"ng", term:"治療", why:"医療行為を連想させる言葉です。国家資格のない整体・カイロでは使えません。", alt:"施術、ケア"},
+    {re:/治(?:る|り|っ|ら|れ|せ|す|し|そ)/g, level:"ng", term:"治る・治す", why:"効果を断定し、医療行為を連想させます。", alt:"和らげる、すっきりした状態を目指す"},
+    {re:/完治/g, level:"ng", term:"完治", why:"効果を保証する表現で、医療行為も連想させます。", alt:"（使わない）"},
+    {re:/診療(?:時間|日)?/g, level:"ng", term:"診療", why:"医師が行う行為を表す言葉です。看板やホームページに残っていることが多いので注意してください。", alt:"受付時間、営業時間、施術"},
+    {re:/初診/g, level:"ng", term:"初診", why:"医療機関を連想させる言葉です。", alt:"はじめての方、初回"},
+    {re:/再診/g, level:"ng", term:"再診", why:"医療機関を連想させる言葉です。", alt:"2回目以降の方"},
+    {re:/診断|診察/g, level:"ng", term:"診断・診察", why:"医師だけが行える行為を表す言葉です。", alt:"カウンセリング、お体の状態の確認"},
+    {re:/処方/g, level:"ng", term:"処方", why:"医師を連想させる言葉です。", alt:"ご提案、おすすめ"},
+    {re:/ドクター|医師が/g, level:"ng", term:"ドクター・医師", why:"医師でない施術者を医師のように見せると、誤解を招きます。", alt:"施術者、院長"},
+    {re:/必ず|絶対(?:に)?|確実に|間違いなく/g, level:"ng", term:"必ず・絶対", why:"効果を保証する表現です。", alt:"〜を目指して、一人ひとりに合わせて"},
+    {re:/100\s?[%％]|１００\s?[%％]|百パーセント/g, level:"ng", term:"100%", why:"効果を保証する表現です。", alt:"（数字で保証しない）"},
+    {re:/(?:たった)?[1１一]回で/g, level:"ng", term:"1回で", why:"効果を断定する表現です。", alt:"お体の状態に合わせて"},
+    {re:/[0-9０-９一二三四五六七八九十]+(?:日|週間|回)で/g, level:"warn", term:"〇日で・〇回で", why:"期間や回数で効果を約束しているように読めないか確認してください。", alt:"（期間や回数と効果を結びつけない）"},
+    {re:/即効|即日改善|その場で(?:改善|解消)/g, level:"ng", term:"即効・その場で改善", why:"効果を断定する表現です。", alt:"すっきりした状態を目指します"},
+    {re:/保証/g, level:"ng", term:"保証", why:"効果の保証と読まれるおそれがあります。返金保証などを書く場合は条件を明記してください。", alt:"（効果は保証しない）"},
+    {re:/改善(?:します|できます|されます|しました|が見込め|率)/g, level:"ng", term:"改善します", why:"効果を断定する言い方です。", alt:"改善を目指します、すっきりした状態を目指します"},
+    {re:/根本(?:改善|解決|から)/g, level:"warn", term:"根本改善", why:"効果を強く約束しているように読まれます。", alt:"お体全体のバランスを見ながら"},
+    {re:/効果抜群|効果絶大|劇的/g, level:"ng", term:"効果抜群・劇的", why:"根拠のない誇大な表現です。", alt:"（使わない）"},
+    {re:/効(?:く|きます|いた|果的)/g, level:"warn", term:"効く・効果的", why:"何に効くのかを病名や症状と結びつけると、医療的な効果をうたうことになります。", alt:"ケアにおすすめ、すっきりしたい方に"},
+    {re:/最高|最強|最上級|日本一|世界一|地域一番|業界初|唯一/g, level:"ng", term:"最高・日本一", why:"根拠のない最上級表現は景品表示法の問題になりやすい表現です。", alt:"〇年続けてきた、丁寧な"},
+    {re:/[NＮ][oｏ]\.?\s?[1１]|ナンバー(?:ワン|1|１)/g, level:"ng", term:"No.1", why:"根拠のない最上級表現です。調査にもとづく場合も、根拠の明記が必要です。", alt:"（使わない）"},
+    {re:/他院(?:より|と比べ|と違い)|どこよりも/g, level:"ng", term:"他院より", why:"他と比べて優れているとうたう表現です。", alt:"（比較しない）"},
+    {re:/患者様の声|お客様の声|体験談|ビフォー(?:・)?アフター|[Bb]efore\s?[\/／&＆]?\s?[Aa]fter/g, level:"warn", term:"体験談・ビフォーアフター", why:"効果の誤認を招きやすく、トラブルになりやすい表現です。", alt:"施術の流れや院の雰囲気を紹介する"},
+    {re:/さんは[0-9０-９一二三四五六七八九十]+回で/g, level:"ng", term:"〇〇さんは〇回で", why:"体験談で効果をうたう表現です。", alt:"（使わない）"},
+    {re:/患者(?:さん|様)?/g, level:"warn", term:"患者", why:"整体・カイロでは医療を連想させるため、「お客様」などを使う院もあります。業種と文脈で判断してください。", alt:"お客様、ご来院の方"},
+    {re:/椎間板ヘルニア|ヘルニア|坐骨神経痛|脊柱管狭窄症|自律神経失調症|変形性膝関節症|側弯症|五十肩|四十肩|偏頭痛|片頭痛|頭痛|不眠症|うつ病|生理痛|不妊|アトピー|喘息|高血圧|糖尿病|がん(?!ば|ぼ)|癌/g, level:"warn", term:"病名", why:"病名と「よくなる」「効く」などをセットにすると、医療的な効果をうたうことになります。", alt:"病名を出さず「〇〇がつらい方へ」などの悩みの言葉にする"}
+  ];
+
+  var SAMPLE = "【例文】\nデスクワークの肩こり、当院なら1回で必ず改善します！\n地域No.1の技術で、ヘルニアや坐骨神経痛も根本から治します。\n\n初診の方は診療時間内にご予約ください。\nお客様の声：〇〇さんは3回で腰痛がなくなりました。";
+
+  var src = document.getElementById("src");
+  var out = document.getElementById("out");
+  var list = document.getElementById("list");
+  var score = document.getElementById("score");
+
+  function esc(s){return s.replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+
+  function scan(text){
+    var hits = [];
+    RULES.forEach(function(r, i){
+      r.re.lastIndex = 0; var m;
+      while((m = r.re.exec(text)) !== null){
+        if(!m[0].length){ r.re.lastIndex++; continue; }
+        hits.push({s:m.index, e:m.index+m[0].length, rule:i, text:m[0]});
+      }
+    });
+    // earlier rules win on overlap, then longer matches
+    hits.sort(function(a,b){ return a.s-b.s || a.rule-b.rule || (b.e-b.s)-(a.e-a.s); });
+    var kept = [], end = -1;
+    hits.forEach(function(h){ if(h.s >= end){ kept.push(h); end = h.e; } });
+    return kept;
+  }
+
+  function render(){
+    var text = src.value;
+    if(!text.trim()){
+      out.innerHTML = '<span class="empty">文章を貼ると、ここに結果が出ます。</span>';
+      list.innerHTML = ""; score.innerHTML = ""; return;
+    }
+    var hits = scan(text), html = "", pos = 0;
+    hits.forEach(function(h){
+      html += esc(text.slice(pos, h.s));
+      var r = RULES[h.rule];
+      html += '<mark class="'+r.level+'" title="'+esc(r.term)+'">'+esc(h.text)+'</mark>';
+      pos = h.e;
+    });
+    html += esc(text.slice(pos));
+    out.innerHTML = html;
+
+    var groups = {}, order = [];
+    hits.forEach(function(h){
+      if(!groups[h.rule]){ groups[h.rule] = {n:0, words:{}}; order.push(h.rule); }
+      groups[h.rule].n++; groups[h.rule].words[h.text] = true;
+    });
+    order.sort(function(a,b){
+      var la = RULES[a].level === "ng" ? 0 : 1, lb = RULES[b].level === "ng" ? 0 : 1;
+      return la-lb;
+    });
+    var ng = 0, warn = 0;
+    order.forEach(function(i){ if(RULES[i].level === "ng") ng += groups[i].n; else warn += groups[i].n; });
+
+    if(!hits.length){
+      score.innerHTML = '<span class="pill ok">見つかりませんでした</span>';
+      list.innerHTML = '<li><p class="clear">気になる表現は見つかりませんでした。最後に、院にない設備やメニューが書かれていないかだけ、ご自身で確認してください。</p></li>';
+      return;
+    }
+    score.innerHTML = (ng ? '<span class="pill ng">避けたい表現 '+ng+'</span>' : '') + (warn ? '<span class="pill warn">要確認 '+warn+'</span>' : '');
+    list.innerHTML = order.map(function(i){
+      var r = RULES[i], g = groups[i];
+      var words = Object.keys(g.words).map(esc).join("、");
+      return '<li class="item '+r.level+'"><div class="top"><span class="tag">'+(r.level==="ng"?"避けたい":"要確認")+'</span><span class="term">'+words+'</span><span class="cnt">'+g.n+'か所</span></div>'
+        + '<p class="why">'+esc(r.why)+'</p><p class="alt"><b>言い換え例</b>　'+esc(r.alt)+'</p></li>';
+    }).join("");
+  }
+
+  var t;
+  src.addEventListener("input", function(){ clearTimeout(t); t = setTimeout(render, 150); });
+  document.getElementById("btn-sample").addEventListener("click", function(){ src.value = SAMPLE; render(); src.focus(); });
+  document.getElementById("btn-clear").addEventListener("click", function(){ src.value = ""; render(); src.focus(); });
+
+  src.value = SAMPLE;
+  render();
+})();
+</script>
+</body>
+</html>
